@@ -1,9 +1,63 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-    <h1>New post</h1>
+
+<!------------------------------ Page Title ----------------->
+    <h1>{{ page_title }}</h1>
+
     <form method="POST" class="post-form">{% csrf_token %}
-        {{ form.as_p }}
+		{% for hidden_field in form.hidden_fields %}
+			{% if hidden_field.errors %}
+			<ul>
+				{% for error in hidden_field.errors %}
+				  <li>(Hidden field {{ hidden_field.name }}) {{ error }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+			{{ hidden_field }}
+		{% endfor %}
+
+<!------------------------------ Title Field ----------------->
+		<div class="form-group row">
+		  <label class="col-md-1 col-form-label form-control-label">Title</label>
+		  <div class="col-md-11">
+		      	<input class="form-control" type="text"
+			       name="{{ form.title.name }}"
+			       {% if form.title.value != None %}value="{{ form.title.value|stringformat:'s' }}"{% endif %}
+			       maxlength="{{ form.title.field.max_length }}">
+				{% if form.title.errors %}
+					<font class="text-danger">{{ form.title.errors }}</font>
+				{% endif %}
+		  </div>
+		</div>
+
+<!------------------------------ Category Field ----------------->
+		<div class="form-group row">
+		  <label class="col-md-1 col-form-label form-control-label">Category</label>
+		  <div class="col-md-8">
+		      <select class="form-control" name="{{ form.category.name }}">
+				{% for choice in cats %}
+				    <option value="{{ choice.pk }}"{% if form.category.value == choice.pk %} selected{% endif %}>{{ choice }}</option>
+				{% endfor %}
+				</select>
+				{% if form.category.errors %}
+					<font class="text-danger">{{ form.category.errors }}</font>
+				{% endif %}
+		  </div>
+		</div>
+
+<!------------------------------ Text Field ----------------->
+	  	<script src="http://js.nicedit.com/nicEdit-latest.js" type="text/javascript"></script>
+		<script type="text/javascript">bkLib.onDomLoaded(nicEditors.allTextAreas);</script>
+		<div class="form-group row">
+		  <label class="col-md-1 col-form-label form-control-label">Text</label>
+		  <div class="col-md-12">
+		      	<textarea class="form-control" name="{{ form.text.name }}">{% if form.title.value != None %}{{ form.text.value }}{% endif %}</textarea>
+				{% if form.text.errors %}
+					<font class="text-danger">{{ form.text.errors }}</font>
+				{% endif %}
+		  </div>
+		</div>
         <button type="submit" class="save btn btn-primary btn-block">Save</button>
     </form>
 {% endblock %}

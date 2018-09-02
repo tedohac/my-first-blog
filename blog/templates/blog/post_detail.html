@@ -1,20 +1,102 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-    <div class="post">
-        <h1>
-        	{{ post.title }}
 
-        	{% if user.is_authenticated %}
-        	<a class="btn btn-default pull-right" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-        	{% endif %}
-        </h1>
-
-        {% if post.published_date %}
-            <div class="date">
-                {{ post.published_date }}
-            </div>
-        {% endif %}
-        <p align="justify">{{ post.text|linebreaksbr }}</p>
+<!------------------------------ Success Box ----------------->
+  {% if suc_msg %}
+    <div class="alert alert-success" role="alert">
+      <small>{{ suc_msg }}</small>
     </div>
+  {% endif %}
+
+
+<!------------------------------ Post Header ----------------->
+  <h2>
+  	{{ post.title }}
+
+  	{% if user.is_authenticated %}
+    <a class="btn btn-default pull-right marri10" href="{% url 'post_remove' pk=post.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+  	<a class="btn btn-default pull-right marri10" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+      {% if post.published_date %}
+        <a class="btn btn-default pull-right marri10" href="{% url 'post_pull' pk=post.pk %}">Archieve to draft</a>
+      {% else %}
+        <a class="btn btn-default pull-right marri10" href="{% url 'post_publish' pk=post.pk %}">Publish</a>
+      {% endif %}
+  	{% endif %}
+  </h2>
+
+  <font style="color: #666;">
+  {% if post.published_date %}
+    Published: {{ post.published_date }}, Comment: {{ post.approved_comments.count }}
+  {% else %}
+    This post saved as draft
+  {% endif %}
+  
+  {% if user.is_authenticated %}
+    , Comment Need to Approve: {{ post.not_approved_comments.count }}, Saved: {{ post.created_date }}
+  {% endif %}
+  </font>
+  <hr />
+
+<!------------------------------ Post Content ----------------->
+  <p>
+    {% autoescape off %}
+        {{ post.text }}
+    {% endautoescape %}
+  </p>
+  <hr>
+
+<!------------------------------ Comment Box ----------------->
+  {% if post.published_date %}
+    <form method="POST" class="post-form" action="{% url 'add_comment_to_post' pk=post.pk %}">{% csrf_token %}
+    <div class="panel panel-default">
+      <div class="panel-heading">Add Comment</div>
+      <div class="panel-body">
+
+        <div class="form-group row">
+          <label class="col-md-1 col-form-label form-control-label">Author</label>
+          <div class="col-md-11">
+            <input class="form-control" type="text"
+               name="{{ form.author.name }}"
+               {% if form.author.value != None %}value="{{ form.author.value|stringformat:'s' }}"{% endif %}
+               maxlength="{{ form.author.field.max_length }}">
+            {% if form.author.errors %}
+              <font class="text-danger">{{ form.author.errors }}</font>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="form-group row">
+          <label class="col-md-1 col-form-label form-control-label">Text</label>
+          <div class="col-md-11">
+                <textarea class="form-control" name="{{ form.text.name }}">{% if form.title.value != None %}{{ form.text.value }}{% endif %}</textarea>
+            {% if form.text.errors %}
+              <font class="text-danger">{{ form.text.errors }}</font>
+            {% endif %}
+          </div>
+        </div>
+
+        <button type="submit" class="save btn btn-primary btn-block">Submit</button>
+
+      </div>
+    </div>
+    </form>
+  {% endif %}
+
+<!------------------------------ Comment List ----------------->
+  <table class="table table-striped table-sm">
+    <tbody>
+    {% for comment in post.comments.all %}
+      <tr>
+        <td>
+          <div class="date">{{ comment.created_date }}</div>
+          <strong>{{ comment.author }}</strong>
+          <p>{{ comment.text|linebreaks }}</p>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td>No comments here yet</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

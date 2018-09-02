@@ -1,0 +1,100 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+  <h1>Manage Categories</h1>
+
+<!------------------------------ Success Box ----------------->
+  {% if suc_msg %}
+    <div class="alert alert-success" role="alert">
+      <small>{{ suc_msg }}</small>
+    </div>
+  {% endif %}
+
+<!------------------------------ Create New Category Box ----------------->
+  <form method="POST" class="post-form">{% csrf_token %}
+  <div class="panel panel-default">
+    <div class="panel-heading">Create New Category</div>
+    <div class="panel-body">
+      <div class="form-group row">
+        <label class="col-md-2 col-form-label form-control-label">Category Name</label>
+        <div class="col-md-8">
+            <input class="form-control" type="text"
+             name="{{ form.title.name }}"
+             {% if form.title.value != None %}value="{{ form.title.value|stringformat:'s' }}"{% endif %}
+             maxlength="{{ form.title.field.max_length }}">
+             {% if form.title.errors %}
+              <font class="text-danger">{{ form.title.errors }}</font>
+             {% endif %}
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary btn-block">
+              Save
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </form>
+
+<!------------------------------ Category List ----------------->
+  <h3>Category List</h3>
+	<div class="table">
+    <i>can only delete categories that have no posts</i>
+  	<table class="table table-striped table-bordered table-sm">
+      <thead>
+        <tr>
+          <th width="30">#</th>
+          <th>Category Name</th>
+          <th width="30">Delete</th>
+        </tr>
+      </thead>
+    	<tbody>
+        {% if not cats_pag %}
+          <tr><td colspan="3">Empty Result</td></tr>
+        {% else %}
+      	{% for cat in cats_pag %}
+    		  <tr>
+            <td>
+              {{ forloop.counter0|add:cats_pag.start_index }}
+            </td>
+        		<td>
+              {{ cat.title }}
+            </td>
+            <td>
+              {% if cat.posts.count == 0 %}
+                <a class="btn btn-default pull-right" href="{% url 'cat_remove' pk=cat.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+              {% endif %}
+            </td>
+        	</tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+
+<!------------------------------ Paggination ----------------->
+    {% if cats_pag.has_other_pages %}
+    <ul class="pagination">
+      {% if cats_pag.has_previous %}
+        <li><a href="?page={{ cats_pag.previous_page_number }}">&laquo;</a></li>
+      {% else %}
+        <li class="disabled"><span>&laquo;</span></li>
+      {% endif %}
+
+      {% for i in cats_pag.paginator.page_range %}
+        {% if cats_pag.number == i %}
+          <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+        {% else %}
+          <li><a href="?page={{ i }}">{{ i }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if cats_pag.has_next %}
+        <li><a href="?page={{ cats_pag.next_page_number }}">&raquo;</a></li>
+      {% else %}
+        <li class="disabled"><span>&raquo;</span></li>
+      {% endif %}
+    </ul>
+    {% endif %}
+  </div>
+
+{% endblock %}

@@ -1,22 +1,57 @@
 {% load static %}
 <html>
-    <head>
-    	<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css">
-		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.css">
+    <head> 
+    	<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
         <title>Django Girls blog</title>
         <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
         <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     </head>
     <body>
-	    <div class="page-header">
-	        <h1>
-	        	<a href="/">Django Girls Blog</a>
-	        	{% if user.is_authenticated %}
-		        	<a href="{% url 'post_new' %}" class="top-menu"><span class="glyphicon glyphicon-plus"></span></a>
-		        {% endif %}
-	        </h1>
-	    </div>
-	    <div class="content container horizontal-center">
+	    <div class="container">
+	    	<br />
+	    	<nav class="navbar navbar-default">
+			  <div class="container-fluid">
+			    <div class="navbar-header">
+			      <a class="navbar-brand" href="/">TedoBlogs.py</a>
+			    </div>
+			    <ul class="nav navbar-nav">
+		    	  <li class="dropdown">
+			        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Categoies
+			        <span class="caret"></span></a>
+			        <ul class="dropdown-menu">
+			        	{% for cat in cats %}
+			        		<li><a href="#">{{ cat }}</a></li>
+		        		{% empty %}
+			        		<li><a href="#"><i>No Categories</i></a></li>
+			        	{% endfor %}
+			        </ul>
+			      </li>
+			    </ul>
+			    <ul class="nav navbar-nav navbar-right">
+	        		{% if user.is_authenticated %}
+	        		<li class="dropdown">
+			          <a class="dropdown-toggle" data-toggle="dropdown" href="#"><span class="glyphicon glyphicon-user"></span> Hello {{ user.username }}
+			          <span class="caret"></span></a>
+			          <ul class="dropdown-menu">
+			            <li><a href="{% url 'post_new' %}">New Post</a></li>
+			            <li><a href="{% url 'post_draft_list' %}">Draft</a></li>
+			            <li><a href="{% url 'mng_category' %}">Manage Category</a></li>
+			            <li><a href="{% url 'logout' %}">Log Out</a></li>
+			          </ul>
+			        </li>
+	        		{% else %}
+			      		<li><a href="{% url 'login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+			      	{% endif %}
+			    </ul>
+			  </div>
+			</nav>
             {% block content %}
             {% endblock %}
 	    </div>
