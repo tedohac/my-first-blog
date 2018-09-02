@@ -1,0 +1,36 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+    <div>
+    <form method="POST">{% csrf_token %}
+        <div class="row">
+          <div class="col-lg-9">
+              <input type="text" name="title" class="form-control" />
+          </div>
+          <div class="col-lg-3">
+              <button type="submit" class="btn btn-primary btn-block">Search</button>
+          </div>
+        </div>
+    </form>
+    </div>
+	<div class="table">
+    	<table class="table table-striped table-bordered table-sm">
+        	<tbody>
+                {% if not posts %}
+                    <tr><td colspan="2">Empty Result</td></tr>
+                {% else %}
+            	{% for post in posts %}
+            		<tr>
+                		<td><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></td>
+                		{% if user.is_authenticated %}
+                		<td width="40">
+                			<a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
+                		</td>
+                		{% endif %}
+                	</tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
