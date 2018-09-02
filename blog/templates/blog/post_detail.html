@@ -11,7 +11,7 @@
 
 
 <!------------------------------ Post Header ----------------->
-  <h2>
+  <h1>
   	{{ post.title }}
 
   	{% if user.is_authenticated %}
@@ -23,11 +23,11 @@
         <a class="btn btn-default pull-right marri10" href="{% url 'post_publish' pk=post.pk %}">Publish</a>
       {% endif %}
   	{% endif %}
-  </h2>
+  </h1>
 
-  <font style="color: #666;">
+  <font class="subtitle">
   {% if post.published_date %}
-    Published: {{ post.published_date }}, Comment: {{ post.approved_comments.count }}
+    Published: {{ post.published_date|date:'Y-m-d H:i:s' }}, Comment: {{ post.approved_comments.count }}
   {% else %}
     This post saved as draft
   {% endif %}
@@ -69,7 +69,7 @@
         <div class="form-group row">
           <label class="col-md-1 col-form-label form-control-label">Text</label>
           <div class="col-md-11">
-                <textarea class="form-control" name="{{ form.text.name }}">{% if form.title.value != None %}{{ form.text.value }}{% endif %}</textarea>
+                <textarea class="form-control" name="{{ form.text.name }}"></textarea>
             {% if form.text.errors %}
               <font class="text-danger">{{ form.text.errors }}</font>
             {% endif %}
@@ -84,16 +84,23 @@
   {% endif %}
 
 <!------------------------------ Comment List ----------------->
+  <h4>Comments</h4>
   <table class="table table-striped table-sm">
     <tbody>
     {% for comment in post.comments.all %}
+      {% if user.is_authenticated or comment.approved_comment %}
       <tr>
         <td>
-          <div class="date">{{ comment.created_date }}</div>
+          <a class="btn btn-default pull-right" href="{% url 'comment_remove' pk=comment.pk %}"><span class="glyphicon glyphicon-trash"></span></a>
+          {% if not comment.approved_comment %}
+            <a class="btn btn-default pull-right marri10" href="{% url 'comment_approve' pk=comment.pk %}"><span class="glyphicon glyphicon-ok"></span></a>
+          {% endif %}
           <strong>{{ comment.author }}</strong>
           <p>{{ comment.text|linebreaks }}</p>
+          <small><i>{{ comment.created_date|date:'Y-m-d H:i:s' }}</i></small>
         </td>
       </tr>
+      {% endif %}
     {% empty %}
       <tr><td>No comments here yet</td></tr>
     {% endfor %}

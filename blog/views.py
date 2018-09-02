@@ -6,13 +6,52 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def post_list(request):
+  param = {}
   form = PostSearchForm()
-  if request.method == "POST":
-    search = request.POST.get('title')
+  if request.GET.get('title') != '' and request.GET.get('title') != None:
+    search = request.GET.get('title')
     posts = Post.objects.filter(published_date__lte=timezone.now(),title__contains=search).order_by('-published_date')
+    param['info_msg'] = "Search post contain \"" + search + "\""
   else:
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-  return render(request, 'blog/post_list.html', {'cats' : get_cat(), 'posts' : posts})
+  param['cats'] = get_cat()
+  page = request.GET.get('page', 1)
+  paginator = Paginator(posts, 5)
+  try:
+    posts_pag = paginator.page(page)
+  except PageNotAnInteger:
+    posts_pag = paginator.page(1)
+  except EmptyPage:
+    posts_pag = paginator.page(paginator.num_pages)
+  param['posts'] = posts_pag
+  param['page_title'] = "All Published Post"
+  return render(request, 'blog/post_list.html', param)
+
+
+
+
+def post_category(request, pk):
+  cat = get_object_or_404(Category, pk=pk)
+  param = {}
+  form = PostSearchForm()
+  if request.GET.get('title') != '' and request.GET.get('title') != None:
+    search = request.GET.get('title')
+    posts = Post.objects.filter(published_date__lte=timezone.now(),category=cat,title__contains=search).order_by('-published_date')
+    param['info_msg'] = "Search post contain \"" + search + "\""
+  else:
+    posts = Post.objects.filter(published_date__lte=timezone.now(),category=cat).order_by('-published_date')
+  param['cats'] = get_cat()
+  page = request.GET.get('page', 1)
+  paginator = Paginator(posts, 5)
+  try:
+    posts_pag = paginator.page(page)
+  except PageNotAnInteger:
+    posts_pag = paginator.page(1)
+  except EmptyPage:
+    posts_pag = paginator.page(paginator.num_pages)
+  param['posts'] = posts_pag
+  param['page_title'] = "Post with Category: " + str(cat)
+  return render(request, 'blog/post_list.html', param)
 
 
 
@@ -58,13 +97,14 @@ def post_edit(request, pk):
 
 @login_required
 def post_draft_list(request):
-  if request.method == "POST":
-    search = request.POST.get('title')
-    posts = Post.objects.filter(published_date__isnull=True,title__contains=search).order_by('-published_date')
+  param = {}
+  form = PostSearchForm()
+  if request.GET.get('title') != '' and request.GET.get('title') != None:
+    search = request.GET.get('title')
+    posts = Post.objects.filter(published_date__isnull=True,title__contains=search).order_by('-created_date')
+    param['info_msg'] = "Search post contain \"" + search + "\""
   else:
-    form = PostSearchForm()
     posts = Post.objects.filter(published_date__isnull=True).order_by('-created_date')
-
   page = request.GET.get('page', 1)
   paginator = Paginator(posts, 5)
   try:
@@ -73,8 +113,8 @@ def post_draft_list(request):
     posts_pag = paginator.page(1)
   except EmptyPage:
     posts_pag = paginator.page(paginator.num_pages)
-
-  return render(request, 'blog/post_draft_list.html', {'posts': posts_pag})
+  param['posts'] = posts_pag
+  return render(request, 'blog/post_draft_list.html', param)
 
 
 
@@ -153,6 +193,7 @@ def get_cat_pag(page):
 
 
 def add_comment_to_post(request, pk):
+  param = {}
   post = get_object_or_404(Post, pk=pk)
   form = CommentForm(request.POST)
   if form.is_valid():
@@ -165,3 +206,19 @@ def add_comment_to_post(request, pk):
   param['post'] = post
   param['form'] = form
   return render(request, 'blog/post_detail.html', param)
+
+
+
+@login_required
+def comment_approve(request, pk):
+  comment = get_object_or_404(Comment, pk=pk)
+  comment.approve()
+  return redirect('post_detail', pk=comment.post.pk)
+
+
+
+@login_required
+def comment_remove(request, pk):
+  comment = get_object_or_404(Comment, pk=pk)
+  comment.delete()
+  return redirect('post_detail', pk=comment.post.pk)

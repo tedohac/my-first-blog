@@ -3,9 +3,17 @@
 {% block content %}
   	<h1>Draft List</h1>
 
+<!------------------------------ Info Box ----------------->
+  {% if info_msg %}
+    <div class="alert alert-info" role="alert">
+      <small>{{ info_msg }}</small>
+      <a class="pull-right" href="{% url 'post_draft_list' %}"><span class="glyphicon glyphicon-remove"></span></a>
+    </div>
+  {% endif %}
+
 <!------------------------------ Search Form ----------------->
     <div>
-	    <form method="POST">{% csrf_token %}
+	    <form method="GET">{% csrf_token %}
 	        <div class="row">
 	          <div class="col-lg-9">
 	              <input type="text" name="title" class="form-control" />
@@ -31,14 +39,14 @@
             </thead>
         	<tbody>
                 {% if not posts %}
-                    <tr><td colspan="2">Empty Result</td></tr>
+                    <tr><td colspan="5">Empty Result</td></tr>
                 {% else %}
             	{% for post in posts %}
             		<tr>
                         <td>{{ forloop.counter0|add:posts.start_index }}</td>
                 		<td><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></td>
                         <td>{{ post.category }}</td>
-                        <td>{{ post.created_date }}</td>
+                        <td>{{ post.created_date|date:'Y-m-d H:i:s' }}</td>
                 		<td width="40">
                 			<a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
                 		</td>
@@ -53,7 +61,7 @@
     {% if posts.has_other_pages %}
     <ul class="pagination">
       {% if posts.has_previous %}
-        <li><a href="?page={{ posts.previous_page_number }}">&laquo;</a></li>
+        <li><a href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}page={{ posts.previous_page_number }}">&laquo;</a></li>
       {% else %}
         <li class="disabled"><span>&laquo;</span></li>
       {% endif %}
@@ -62,12 +70,12 @@
         {% if posts.number == i %}
           <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
         {% else %}
-          <li><a href="?page={{ i }}">{{ i }}</a></li>
+          <li><a href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}page={{ i }}">{{ i }}</a></li>
         {% endif %}
       {% endfor %}
 
       {% if posts.has_next %}
-        <li><a href="?page={{ posts.next_page_number }}">&raquo;</a></li>
+        <li><a href="?{% if request.GET.title %}title={{ request.GET.title }}&{% endif %}page={{ posts.next_page_number }}">&raquo;</a></li>
       {% else %}
         <li class="disabled"><span>&raquo;</span></li>
       {% endif %}

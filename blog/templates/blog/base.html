@@ -9,8 +9,9 @@
 
 		<!-- Latest compiled JavaScript -->
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
-        <title>Django Girls blog</title>
+        <title>Tedo Blogs</title>
         <link href="//fonts.googleapis.com/css?family=Lobster&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
         <link rel="stylesheet" href="{% static 'css/blog.css' %}">
     </head>
     <body>
@@ -27,7 +28,7 @@
 			        <span class="caret"></span></a>
 			        <ul class="dropdown-menu">
 			        	{% for cat in cats %}
-			        		<li><a href="#">{{ cat }}</a></li>
+			        		<li><a href="{% url 'post_category' pk=cat.pk %}">{{ cat }}</a></li>
 		        		{% empty %}
 			        		<li><a href="#"><i>No Categories</i></a></li>
 			        	{% endfor %}
